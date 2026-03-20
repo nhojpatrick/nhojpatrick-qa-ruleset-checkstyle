@@ -111,7 +111,7 @@
 					<configuration>
 						<rules>
 							<requireJavaVersion>
-								<version>[1.8,9),[11,12),[17,18),[21,22),[25,26)</version>
+								<version>[11,12),[17,18),[21,22),[25,26)</version>
 							</requireJavaVersion>
 							<requireMavenVersion>
 								<version>[3.9.8,)</version>
@@ -504,7 +504,7 @@
 		<!-- custom properties -->
 		<project.Automatic-Module-Name>com.github.nhojpatrick.qa.ruleset.checkstyle</project.Automatic-Module-Name>
 		<project.custom.encoding>UTF-8</project.custom.encoding>
-		<project.custom.java.version>1.8</project.custom.java.version>
+		<project.custom.java.version>11</project.custom.java.version>
 		<!-- maven user properties -->
 		<downloadJavadocs>true</downloadJavadocs>
 		<downloadSources>true</downloadSources>
