@@ -169,6 +169,17 @@ commands:
                 <jdkHome>${JAVA_HOME}</jdkHome>
               </configuration>
             </toolchain>
+            <toolchain>
+              <type>jdk</type>
+              <provides>
+                <version>25</version>
+                <vendor>openjdk</vendor>
+                <id>openjdk-25</id>
+              </provides>
+              <configuration>
+                <jdkHome>${JAVA_HOME}</jdkHome>
+              </configuration>
+            </toolchain>
           </toolchains>
           EOF
 
@@ -288,6 +299,14 @@ jobs:
       - std_mvnw_jdk_param:
           jdkVersion: "21"
 
+  jdk25:
+    docker:
+      - image: cimg/openjdk:25.0
+    steps:
+      - setup_openjdk_all_toolchain
+      - std_mvnw_jdk_param:
+          jdkVersion: "25"
+
   qa_matrix:
     parameters:
       qa_step_profile:
@@ -327,6 +346,12 @@ workflows:
               ignore:
                 - develop
                 - main
+      - jdk25:
+          filters:
+            branches:
+              ignore:
+                - develop
+                - main
 
       - passed_builds:
           requires:
@@ -334,6 +359,7 @@ workflows:
             - jdk11
             - jdk17
             - jdk21
+            - jdk25
 
       - qa_matrix:
           name: qa_<< matrix.qa_step_profile >>_jdk_<< matrix.qa_step_jdk >>
