@@ -157,6 +157,7 @@ commands:
         type: string
     description: "Standard QA Step << parameters.stepName >>"
     steps:
+      - checkout
       - run: ./mvnw --batch-mode --fail-at-end --no-transfer-progress --update-snapshots -Pcicd,qa_<< parameters.stepName >> -DskipTests verify
 
 jobs:
@@ -224,9 +225,7 @@ jobs:
       - image: cimg/openjdk:<< parameters.qa_step_jdk >>
     resource_class: small
     steps:
-      - install_openjdk_11
-      - setup_std_toolchain
-      - checkout
+      - setup_openjdk_all_toolchain
       - qa_step:
           stepName: << parameters.qa_step_profile >>
 
