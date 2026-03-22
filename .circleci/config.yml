@@ -84,39 +84,6 @@ commands:
           </toolchains>
           EOF
 
-  setup_openjdk_17_toolchain:
-    description: "Setup ToolChain for OpenJdk 17"
-    steps:
-      - run: mkdir ~/.m2
-      - run: |
-          cat > ~/.m2/toolchains.xml \<< EOF
-          <?xml version="1.0" encoding="UTF-8"?>
-          <toolchains xmlns="http://maven.apache.org/TOOLCHAINS/1.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/TOOLCHAINS/1.1.0 http://maven.apache.org/xsd/toolchains-1.1.0.xsd">
-            <toolchain>
-              <type>jdk</type>
-              <provides>
-                <version>1.8</version>
-                <vendor>openjdk</vendor>
-                <id>openjdk-1.8</id>
-              </provides>
-              <configuration>
-                <jdkHome>${JAVA_HOME}</jdkHome>
-              </configuration>
-            </toolchain>
-            <toolchain>
-              <type>jdk</type>
-              <provides>
-                <version>11</version>
-                <vendor>openjdk</vendor>
-                <id>openjdk-11</id>
-              </provides>
-              <configuration>
-                <jdkHome>/usr/local/jdk-17.0.17</jdkHome>
-              </configuration>
-            </toolchain>
-          </toolchains>
-          EOF
-
   setup_openjdk_all_toolchain:
     description: "Setup ToolChain for OpenJdk all"
     steps:
@@ -213,21 +180,6 @@ commands:
           command: rm -rf ~/.m2/repository/com/github/nhojpatrick
           when: always
 
-  std_mvnw_jdk17:
-    description: "Standard Jdk17 mvnw steps"
-    steps:
-      - checkout
-      - run:
-          name: "Maven Jdk17 Clean Install SkipTests"
-          command: ./mvnw --batch-mode --fail-at-end --no-transfer-progress --update-snapshots -Pcicd clean install -DskipTests
-      - run:
-          name: "Maven Jdk17 Tests"
-          command: ./mvnw --batch-mode --fail-at-end --no-transfer-progress --update-snapshots -Pcicd test
-      - run:
-          name: "Tidy Cache before save"
-          command: rm -rf ~/.m2/repository/com/github/nhojpatrick
-          when: always
-
   std_mvnw_jdk_param:
     parameters:
       jdkVersion:
@@ -288,8 +240,9 @@ jobs:
     docker:
       - image: cimg/openjdk:17.0
     steps:
-      - setup_openjdk_17_toolchain
-      - std_mvnw_jdk17
+      - setup_openjdk_all_toolchain
+      - std_mvnw_jdk_param:
+          jdkVersion: "17"
 
   jdk21:
     docker:
