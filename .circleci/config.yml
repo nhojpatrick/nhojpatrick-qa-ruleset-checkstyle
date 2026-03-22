@@ -1,56 +1,6 @@
 version: 2.1
 
 commands:
-  install_openjdk_11:
-    description: "Install OpenJdk 11"
-    steps:
-      - run: wget https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_linux-x64_bin.tar.gz.sha256 -O ~/openjdk-11.tar.gz.sha256
-      - restore_cache:
-          keys:
-            - openjdk-11-{{ checksum "~/openjdk-11.tar.gz.sha256" }}
-      - run: touch ~/openjdk-11.tar.gz
-      - run: wget -c https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_linux-x64_bin.tar.gz -O ~/openjdk-11.tar.gz
-      - save_cache:
-          key: openjdk-11-{{ checksum "~/openjdk-11.tar.gz.sha256" }}
-          paths:
-            - ~/openjdk-11.tar.gz
-          when: always
-      - run: tar xvf ~/openjdk-11.tar.gz -C ~/
-      - run: sudo mv ~/jdk-11.0.2 /usr/local/openjdk-11
-
-  setup_std_toolchain:
-    description: "Setup ToolChain for multiple OpenJdk versions"
-    steps:
-      - run: mkdir ~/.m2
-      - run: |
-          cat > ~/.m2/toolchains.xml \<< EOF
-          <?xml version="1.0" encoding="UTF-8"?>
-          <toolchains xmlns="http://maven.apache.org/TOOLCHAINS/1.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/TOOLCHAINS/1.1.0 http://maven.apache.org/xsd/toolchains-1.1.0.xsd">
-            <toolchain>
-              <type>jdk</type>
-              <provides>
-                <version>1.8</version>
-                <vendor>openjdk</vendor>
-                <id>openjdk-1.8</id>
-              </provides>
-              <configuration>
-                <jdkHome>${JAVA_HOME}</jdkHome>
-              </configuration>
-            </toolchain>
-            <toolchain>
-              <type>jdk</type>
-              <provides>
-                <version>11</version>
-                <vendor>openjdk</vendor>
-                <id>openjdk-11</id>
-              </provides>
-              <configuration>
-                <jdkHome>/usr/local/openjdk-11</jdkHome>
-              </configuration>
-            </toolchain>
-          </toolchains>
-          EOF
-
 
   setup_openjdk_all_toolchain:
     description: "Setup ToolChain for OpenJdk all"
@@ -118,21 +68,6 @@ commands:
           </toolchains>
           EOF
 
-  std_mvnw_jdk8:
-    description: "Standard JDK8 mvnw steps"
-    steps:
-      - checkout
-      - run:
-          name: "Maven Jdk8 Clean Install"
-          command: ./mvnw --batch-mode --fail-at-end --no-transfer-progress --update-snapshots -Pcicd clean install
-      - run:
-          name: "Maven Jdk8 Build Jdk11 Tests"
-          command: export JAVA_HOME=/usr/local/openjdk-11 && export PATH=${JAVA_HOME}/bin:{$PATH} && ./mvnw --batch-mode --fail-at-end --no-transfer-progress --update-snapshots -Pcicd test
-      - run:
-          name: "Tidy Cache before save"
-          command: rm -rf ~/.m2/repository/com/github/nhojpatrick
-          when: always
-
   std_mvnw_jdk_param:
     parameters:
       jdkVersion:
@@ -179,9 +114,9 @@ jobs:
     docker:
       - image: cimg/openjdk:8.0
     steps:
-      - install_openjdk_11
-      - setup_std_toolchain
-      - std_mvnw_jdk8
+      - setup_openjdk_all_toolchain
+      - std_mvnw_jdk_param:
+          jdkVersion: "8"
 
   jdk11:
     docker:
